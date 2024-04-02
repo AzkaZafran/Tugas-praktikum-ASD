@@ -1,77 +1,101 @@
 #include <stdio.h>
 
-void koboImaginaryChess(int i, int j, int size, int chessBoard[8][8])
+int pop(int Data[], int *top)
 {
-    if(j-2 >= 0)
+    int newTop = *top;
+    int temp = Data[newTop];
+    Data[newTop] = 0;
+    (*top)--;
+    return temp;
+}
+
+int peek(int Data[], int top)
+{
+    return Data[top];
+}
+
+int maxSelect(int Data1[], int topIndex1, int Data2[], int topIndex2, int maxSum)
+{
+    // total nilai yang telah dikeluarkan
+    int sum = 0;
+    // jumlah nilai yang telah dikeluarkan
+    int removed = 0;
+
+    // while loop akan terus berjalan jika belum ada stack yang kosong
+    while(topIndex1 >= 0 && topIndex2 >= 0)
     {
-        if(i+1 < size)
+        // ada pengecualian jika sum ditambah data teratas dari salah satu stack
+        // melebihi maxSum maka while loop akan berhenti
+        if(sum + peek(Data1, topIndex1) > maxSum && sum + peek(Data2, topIndex2) > maxSum)
         {
-            chessBoard[i+1][j-2] = 1;
+            break;
         }
-        if(i-1 >= 0)
+        // jika kondisi tidak sesuai maka akan lanjut ke pengecekan utama
+        // if else ini akan mengecek apabila kondisi antara data teratas stack 1 dengan stack dua
+        // 'lebih dari', 'kurang dari', atau 'sama'.
+        // jika 'kurang dari' maka program akan mengambil data teratas dari stack 1 dan ditambahkan
+        // ke dalam sum
+        if(Data1[topIndex1] < Data2[topIndex2])
         {
-            chessBoard[i-1][j-2] = 1;
+            sum += pop(Data1, &topIndex1);
+            removed++;
+        }
+        // jika 'lebih dari' maka yang diambil adalah data teratas dari stack 2
+        else if(Data2[topIndex2] < Data1[topIndex1])
+        {
+            sum += pop(Data2, &topIndex2);
+            removed++;
+        }
+        // jika 'sama' maka akan melakukan pengecekan lagi yang hampir sama dengan if else diatas
+        // hanya yang dicek adalah data teratas kedua
+        else
+        {
+            if(Data1[topIndex1-1] < Data2[topIndex2-1])
+            {
+                sum += pop(Data1, &topIndex1);
+                removed++;
+            }
+            else if(Data1[topIndex1-1] > Data2[topIndex2-1])
+            {
+                sum += pop(Data2, &topIndex2);
+                removed++;
+            }
         }
     }
-    if(j+2 < size)
-    {
-        if(i+1 < size)
-        {
-            chessBoard[i+1][j+2] = 1;
-        }
-        if(i-1 >= 0)
-        {
-            chessBoard[i-1][j+2] = 1;
-        }
-    }
-    if(i-2 >= 0)
-    {
-        if(j+1 < size)
-        {
-            chessBoard[i-2][j+1] = 1;
-        }
-        if(j-1 >= 0)
-        {
-            chessBoard[i-2][j-1] = 1;
-        }
-    }
-    if(i+2 < size)
-    {
-        if(j+1 < size)
-        {
-            chessBoard[i+2][j+1] = 1;
-        }
-        if(j-1 >= 0)
-        {
-            chessBoard[i+2][j-1] = 1;
-        }
-    }
+
+
+    return removed;
 }
 
 int main()
 {
-    int COL = 8, ROW = 8;
-    int chessBoard[ROW][COL];
-    for(int i = 0; i < ROW; i++)
+    int round;
+    int hasil;
+
+    // user input berapa ronde game
+    scanf("%d", &round);
+    // main program
+    for(int i = 0; i < round; i++)
     {
-        for(int j = 0; j < COL; j++)
+        int n, m, maxSum;
+        scanf("%d %d %d", &n, &m, &maxSum);
+
+        // stack 1 dan 2
+        int stack1[n];
+        int stack2[m];
+
+        // input n dan m data berupa integer ke dalam stack 1 dan stack 2
+        for(int i = n-1; i >= 0; i--)
         {
-            chessBoard[i][j] = 0;
+            scanf("%d", &stack1[i]);
         }
-    }
-    int x, y;
-    printf("Masukkan koordinat x: ");
-    scanf("%d", &x);
-    printf("Masukkan koordinat y: ");
-    scanf("%d", &y);
-    koboImaginaryChess(y, x, ROW, chessBoard);
-    for(int i = 0; i < ROW; i++)
-    {
-        for(int j = 0; j < COL; j++)
+        for(int i = m-1; i >= 0; i--)
         {
-            printf("%d ", chessBoard[i][j]);
+            scanf("%d", &stack2[i]);
         }
-        printf("\n");
+        hasil = maxSelect(stack1, n-1, stack2, m-1, maxSum);
+        printf("hasil: %d\n", hasil);
     }
+
     return 0;
 }
